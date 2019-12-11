@@ -1,0 +1,2 @@
+model_checkpoint_path: "cmgp_aggr.ckpt"
+all_model_checkpoint_paths: "cmgp_aggr.ckpt"
