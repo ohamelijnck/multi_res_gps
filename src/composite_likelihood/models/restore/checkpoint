@@ -1,2 +1,0 @@
-model_checkpoint_path: "single_gp.ckpt"
-all_model_checkpoint_paths: "single_gp.ckpt"

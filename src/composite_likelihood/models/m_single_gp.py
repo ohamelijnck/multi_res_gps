@@ -1,8 +1,7 @@
 import matplotlib
-matplotlib.use("Qt5agg")
 import matplotlib.pyplot as plt
 
-import gprn
+import _gprn as gprn
 
 import sys
 import numpy as np
@@ -53,7 +52,7 @@ def get_context(CONFIG, X, Y):
     context.whiten=True
     context.jitter = 1e-4
     context.shuffle_seed = 0
-    context.num_epochs = 10000
+    context.num_epochs = 5000
     context.seed = 0
     context.restore_location = 'restore/{name}.ckpt'.format(name=CONFIG['file_prefix'])
 
@@ -66,12 +65,13 @@ def get_context(CONFIG, X, Y):
     gprn.kernels.SE._id = -1
     context.kernels = [
         {
-            'f': [gprn.kernels.SE(num_dimensions=1, length_scale=inv(1.0)) for i in range(context.num_latent)],
+            'f': [gprn.kernels.SE(num_dimensions=1, length_scale=inv(0.1)) for i in range(context.num_latent)],
+            'w': [[gprn.kernels.SE(num_dimensions=1, length_scale=inv(0.1)) for i in range(context.num_latent)] for p in range(context.num_outputs)]
         }, #r=0
     ]
     context.noise_sigmas = [
         #[sigma_arr, train_flag]
-        [[inv(0.1) for i in range(context.num_outputs)], True] for j in range(num_datasets)
+        [[inv(0.5) for i in range(context.num_outputs)], False] for j in range(num_datasets) #True likelihood
     ]
 
     return context
@@ -108,14 +108,11 @@ def get_dataset(X, Y, z_r):
     rs = lambda x: x.reshape([x.shape[0]*x.shape[1], x.shape[2]])
 
     for i in [1]:
-        x = X[i]
+        x = X[i][:, 0, :]
         y = Y[i]
-
-        x = rs(x)
         print('dataset: ', i, ' ',  x.shape)
 
         data.add_source_dict({
-            'M': x.shape[1],
             'x': x,
             'y': y,
             'z': z_r,
@@ -145,7 +142,8 @@ def main(CONFIG, return_m=False, force_restore=False):
     context = get_context(CONFIG, X, Y)
 
     #elbo_model =  gprn.models.GPAggr
-    elbo_model =  gprn.models.SingleGP
+    #elbo_model =  gprn.models.SingleGP
+    elbo_model =  gprn.models.Standard
 
     m = gprn.GPRN(
         model = elbo_model,

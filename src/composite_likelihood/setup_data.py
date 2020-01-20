@@ -44,7 +44,7 @@ y = get_f(x)
 xs= np.expand_dims(np.linspace(-2,15, 500), -1)
 ys= np.expand_dims(y, -1)
 
-r = 2
+r = 3
 x_r = get_aggr_x(x, r)
 y_r = get_aggr_y(y, r)
 
